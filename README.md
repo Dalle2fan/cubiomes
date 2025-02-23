@@ -29,10 +29,15 @@ cd cubiomes
 ```
 
 ```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+rm -rf ~/Library/Caches/Homebrew/portable-ruby*
+brew install ruby
+brew doctor
 brew install cmake
 ```
 
 ### **Run Application**  
 ```bash
-./build.sh
+chmod +x build.sh
+sudo ./build.sh
 ``` 
