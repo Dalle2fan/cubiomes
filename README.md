@@ -27,15 +27,14 @@ This tool automates finding Minecraft seeds based on specific biomes, structures
 git clone https://github.com/Dalle2fan/cubiomes.git
 cd cubiomes
 ```
-
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-rm -rf ~/Library/Caches/Homebrew/portable-ruby*
+```
+```bash
 brew install ruby
 brew doctor
 brew install cmake
 ```
-
 ### **Run Application**  
 ```bash
 chmod +x build.sh
