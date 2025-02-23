@@ -1266,7 +1266,6 @@ void parseParameterStream(FILE *fp)
 // MAIN
 int main(int argc, char *argv[])
 {
-    setbuf(stdout, NULL);
     printf("=== Parameter-Based Scanning ===\n");
     printf("Attach a .txt file or specify a path to the config, or paste config lines.\n");
 
