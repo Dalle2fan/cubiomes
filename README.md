@@ -32,7 +32,6 @@ cd cubiomes
 ```
 ```bash
 brew install ruby
-brew doctor
 brew install cmake
 ```
 ### **Run Application**  
