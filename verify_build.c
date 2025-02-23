@@ -32,7 +32,7 @@ int customX      = 0;
 int customZ      = 0;
 
 // Number of threads (can be set by user)
-int tasksCount = 1;
+int tasksCount = 10;
 
 // -----------------------------------------------------------------------------
 // Union–find utility for clustering
@@ -1294,12 +1294,8 @@ int main(int argc, char *argv[])
 
     // 4) Decide how many seeds to scan
     // For demonstration, let's just scan 10k seeds from starting_seed
-    uint64_t scanCount = 10000;
+    uint64_t scanCount = 999999999999;
     end_seed = starting_seed + scanCount - 1ULL;
-
-    // 5) Set number of threads (you might parse this from the config too)
-    // For example, let's keep it at 2
-    tasksCount = 1;
 
     // 6) Initialize global scanning state
     currentSeed     = starting_seed;
