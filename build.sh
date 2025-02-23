@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Exit on any error
+# Exit immediately on any error
 set -e
 
 echo "Checking cubiomes library..."
@@ -52,3 +52,16 @@ else
 fi
 
 cd ..
+
+echo "Compiling verify_build..."
+# -I cubiomes   : so it can find cubiomes/finders.h
+# -L cubiomes   : so it can find libcubiomes.a
+# -lcubiomes    : link to cubiomes library
+# -lm           : link math library (if needed for trig functions)
+gcc -pthread -O2 -o verify_build verify_build.c \
+    -I cubiomes -L cubiomes -lcubiomes -lm
+
+echo "Compilation done."
+
+echo "Running verify_build..."
+./verify_build
