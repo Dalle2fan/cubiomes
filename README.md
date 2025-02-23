@@ -40,4 +40,10 @@ brew install cmake
 ```bash
 chmod +x build.sh
 sudo ./build.sh
-``` 
+```
+
+## **Uninstallation**
+```bash
+sudo chmod -R u+rwx cubiomes
+sudo rm -rf cubiomes
+```
