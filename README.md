@@ -25,6 +25,8 @@ This tool automates finding Minecraft seeds based on specific biomes, structures
 ### **Clone the Repository**  
 ```bash
 git clone https://github.com/Dalle2fan/cubiomes.git
+```
+```bash
 cd cubiomes
 ```
 ```bash
