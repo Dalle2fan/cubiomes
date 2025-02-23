@@ -31,7 +31,7 @@ cd cubiomes
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 rm -rf ~/Library/Caches/Homebrew/portable-ruby*
-brew vendor-install ruby
+brew install ruby
 brew doctor
 brew install cmake
 ```
