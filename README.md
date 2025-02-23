@@ -52,8 +52,8 @@ Custom z: 0
 Custom x: 0
 
 ===== Required structures =====
-1. Village (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
-2. Mansion (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
+1. 9 (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
+2. 5 (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
 
 ===== Structure Clusters =====
 Enabled: true
@@ -102,4 +102,28 @@ sudo ./build.sh
 ```bash
 sudo chmod -R u+rwx cubiomes
 sudo rm -rf cubiomes
+```
+### **Reference to Structure IDs for params:**
+```
+// Structure Index Reference
+//  0  - Feature
+//  1  - Desert_Pyramid
+//  2  - Jungle_Temple
+//  3  - Swamp_Hut
+//  4  - Igloo
+//  5  - Village
+//  6  - Ocean_Ruin
+//  7  - Shipwreck
+//  8  - Monument
+//  9  - Mansion
+// 10  - Outpost
+// 11  - Ruined_Portal
+// 12  - Ruined_Portal_N
+// 13  - Ancient_City
+// 14  - Treasure
+// 15  - Mineshaft
+// 16  - Desert_Well
+// 17  - Geode
+// 18  - Trail_Ruins
+// 19  - Trial_Chambers
 ```
