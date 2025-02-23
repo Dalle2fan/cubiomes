@@ -38,7 +38,6 @@ brew install cmake
 ```
 ### **Run Application**  
 ```bash
-sudo rm -rf cubiomes
 chmod +x build.sh
 sudo ./build.sh
 ``` 
