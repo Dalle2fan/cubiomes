@@ -763,6 +763,16 @@ bool scanSeed(uint64_t seed)
     // 3) Additional structure requirements array
     if (NUM_STRUCTURE_REQUIREMENTS > 0) {
         hasAnyRequirements = true;
+        // Store found structures for organized output later
+        typedef struct {
+            int x, y, z;
+            int biome_id;
+            int biome_size;
+        } FoundPos;
+
+        FoundPos foundPositions[256];
+        int foundPosCount = 0;
+
         for (int rIndex = 0; rIndex < NUM_STRUCTURE_REQUIREMENTS; rIndex++) {
             StructureRequirement req = structureRequirements[rIndex];
             int foundCount = 0;
@@ -797,44 +807,72 @@ bool scanSeed(uint64_t seed)
                     if (!isViableStructurePos(req.structureType, curr_gen, pos.x, pos.z, 0))
                         continue;
 
-                    // Check biome only if requiredBiome != -1
-                    int biome_id = getBiomeAt(curr_gen, 4, pos.x >> 2, pos.z >> 2, 320 >> 2);
-                    if (biome_id == -1) {
-                        // fallback with approximate height
+                    int biome_id = -1;
+                    if (req.requiredBiome != -1) {
+                        // Only check biome if it's required
+                        int checkUnderground = (req.structureType == 17 || req.structureType == 15 || 
+                                              req.structureType == 14 || req.structureType == 11);
+
+                        if (checkUnderground) {
+                            biome_id = getBiomeAt(curr_gen, 4, pos.x >> 2, 0, pos.z >> 2);
+                        } else {
+                            float heightArr[256];
+                            int w = 16, h = 16;
+                            Range r_range = {4, pos.x >> 2, pos.z >> 2, w, h, 1, 1};
+                            mapApproxHeight(heightArr, NULL, curr_gen, curr_sn, r_range.x, r_range.z, w, h);
+                            int lx = pos.x & 15;
+                            int lz = pos.z & 15;
+                            int surface_y = (int)heightArr[lz*w + lx];
+                            biome_id = getBiomeAt(curr_gen, 4, pos.x >> 2, surface_y >> 2, pos.z >> 2);
+                        }
+
+                        if (biome_id != req.requiredBiome)
+                            continue;
+
+                        if (req.minBiomeSize != -1 || req.maxBiomeSize != -1) {
+                            int patchSize = getBiomePatchSize(curr_gen, pos.x, pos.z, biome_id);
+                            if ((req.minBiomeSize != -1 && patchSize < req.minBiomeSize) ||
+                                (req.maxBiomeSize != -1 && patchSize > req.maxBiomeSize))
+                                continue;
+                        }
+                    }
+
+                    // Get height based on structure type
+                    int height = 0;
+                    if (req.structureType == 19 || req.structureType == 17 || 
+                        req.structureType == 15 || req.structureType == 14 || 
+                        req.structureType == 11) {
+                        // For special structures, get height directly from structure data
+                        StructureVariant sv;
+                        if (getVariant(&sv, req.structureType, MC_1_21, seed, pos.x, pos.z, biome_id)) {
+                            height = sv.y;
+                        }
+                    } else {
+                        // For other structures, get surface height
                         float heightArr[256];
                         int w = 16, h = 16;
-                        Range r_range = {4, pos.x >> 2, pos.z >> 2, w, h, 320 >> 2, 1};
+                        Range r_range = {4, pos.x >> 2, pos.z >> 2, w, h, 1, 1};
                         mapApproxHeight(heightArr, NULL, curr_gen, curr_sn, r_range.x, r_range.z, w, h);
                         int lx = pos.x & 15;
                         int lz = pos.z & 15;
-                        int surface_y = (int)heightArr[lz*w + lx];
-                        biome_id = getBiomeAt(curr_gen, 4, surface_y >> 2, surface_y >> 2, pos.z >> 2);
+                        height = (int)heightArr[lz*w + lx];
                     }
 
-                    if (req.requiredBiome != -1 && biome_id != req.requiredBiome)
+                    // Check height constraints if they exist
+                    if ((req.minHeight != -9999 && height < req.minHeight) ||
+                        (req.maxHeight != 9999 && height > req.maxHeight)) {
                         continue;
-
-                    if (req.requiredBiome != -1 &&
-                        (req.minBiomeSize != -1 || req.maxBiomeSize != -1))
-                    {
-                        int patchSize = getBiomePatchSize(curr_gen, pos.x, pos.z, biome_id);
-                        if ((req.minBiomeSize != -1 && patchSize < req.minBiomeSize) ||
-                            (req.maxBiomeSize != -1 && patchSize > req.maxBiomeSize))
-                            continue;
                     }
 
-                    // Height check
-                    // (If your code uses terrain-based Y, you'll need to sample it. 
-                    //  Here we only do a simple pass, so let's skip. 
-                    //  But you can do something like:
-                    // int terrainY = estimateSurfaceHeight(...);
-                    // if (terrainY < req.minHeight || terrainY > req.maxHeight) continue;
-                    //)
-
+                    // Store the found position with height
+                    foundPositions[foundPosCount].x = pos.x;
+                    foundPositions[foundPosCount].z = pos.z;
+                    foundPositions[foundPosCount].y = height;
+                    foundPositions[foundPosCount].biome_id = biome_id;
+                    foundPositions[foundPosCount].biome_size = 
+                        (biome_id != -1) ? getBiomePatchSize(curr_gen, pos.x, pos.z, biome_id) : -1;
+                    foundPosCount++;
                     foundCount++;
-                    printf("Seed %llu: Found structure %d at (%d, %d) in biome %s\n",
-                           (unsigned long long)seed, req.structureType, pos.x, pos.z,
-                           getBiomeName(biome_id));
                 }
             }
 
@@ -842,6 +880,24 @@ bool scanSeed(uint64_t seed)
             if (foundCount < req.minCount) {
                 allRequirementsMet = false;
             }
+        }
+
+        // Organize and print the found structures
+        if (allRequirementsMet) {
+            for (int i = 0; i < NUM_STRUCTURE_REQUIREMENTS; i++) {
+                StructureRequirement req = structureRequirements[i];
+                printf("Valid seed found: %llu\n", (unsigned long long)seed);
+                printf("Structures %d:\n", req.structureType);
+                for (int j = 0; j < foundPosCount; j++) {
+                    if (foundPositions[j].biome_id == req.requiredBiome || req.requiredBiome == -1) {
+                        printf("Structure %d at (%d, %d) with height at %d in %s Biome with %d size\n",
+                            req.structureType, foundPositions[j].x, foundPositions[j].z,
+                            foundPositions[j].y, getBiomeName(foundPositions[j].biome_id),
+                            foundPositions[j].biome_size);
+                    }
+                }
+            }
+            return true;
         }
     }
 
@@ -979,84 +1035,57 @@ void parseParameterLine(char *line)
     else if (strcmp(currentSection, "===== Required structures =====") == 0) 
     {
         // Lines look like:
-        // 1. Village (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
-        // We just parse them
-        // We might do something like:
-        int idx, minCount, minH, maxH, biome, minSz, maxSz;
-        char nameBuf[64];
-        // Because the line might have the structure name in parentheses, 
-        // we can do a rough parse. Adjust as needed for your actual structure IDs.
-        // Example line:
-        // "2. Mansion (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)"
-        // We'll pretend we know how to map "Mansion" -> Cubiomes ID 6 or something.
-        // For demonstration, let's do a trivial approach:
+        // 1. 5 (min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)
+        int idx, structureType, minCount, minH, maxH, biome, minSz, maxSz;
 
-        // Find structure name: everything up to '(' minus the "x. " prefix
-        // This requires a robust approach or a known set of structure names -> IDs.
-
-        // For brevity, assume we can parse:
-        //   <idx>. <Name> (min amount: ...
-        // Then we look inside parentheses.
-
-        // This is an example. Real code might have a lookup table from "Village" to 5, "Mansion" to 6, etc.
-        // Let's do a small switch as a demo:
-        // We'll define a helper function or inline code.
-
-        // Quick parse (this is *very* naive):
-        // Step 1: parse out index and name:
-
+        // Parse the line format: "1. 5 (min amount: ...)"
         char *openParen = strchr(line, '(');
-        if (!openParen) return; 
-        // parse "x. <Name>" part
-        // e.g. "1. Village "
-        char prefix[128];
-        strncpy(prefix, line, openParen - line);
-        prefix[openParen-line] = '\0';
-        trim(prefix);
+        if (!openParen) return;
 
-        // prefix might be "1. Village"
-        sscanf(prefix, "%d. %63[^\n]", &idx, nameBuf);
-        trim(nameBuf);
+        // Get the structure ID directly
+        sscanf(line, "%d. %d", &idx, &structureType);
 
-        // Step 2: parse parentheses
-        // e.g. "min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1)"
+        // Parse parameters inside parentheses
         char parenPart[256];
-        strcpy(parenPart, openParen+1);
-        // remove trailing ')'
+        strcpy(parenPart, openParen + 1);
         char *endParen = strrchr(parenPart, ')');
         if (endParen) *endParen = '\0';
-        // Now parse the known fields:
-        // "min amount: 1, min height: -9999, max height: 9999, biome: -1, min size: -1, max size: -1"
-        sscanf(parenPart, "min amount: %d, min height: %d, max height: %d, biome: %d, min size: %d, max size: %d",
-                          &minCount, &minH, &maxH, &biome, &minSz, &maxSz);
 
-        // Map the nameBuf to actual structure ID
-        // Just as an example:
-        int structureType = -1;
-        if (strstr(nameBuf, "Village")) {
-            // For cubiomes: 5 is Village (in the structure enum)
-            structureType = 5; 
-        }
-        else if (strstr(nameBuf, "Mansion")) {
-            // 6 is Mansion in the structure enum? (Double-check your actual ID.)
-            structureType = 6;
-        }
-        else {
-            // add more mappings as needed
+        if (sscanf(parenPart, "min amount: %d, min height: %d, max height: %d, biome: %d, min size: %d, max size: %d",
+                   &minCount, &minH, &maxH, &biome, &minSz, &maxSz) != 6) {
+            fprintf(stderr, "Warning: Failed to parse structure parameters correctly\n");
+            return;
         }
 
-        // Append to structureRequirements array
-        structureRequirements = realloc(structureRequirements, (NUM_STRUCTURE_REQUIREMENTS+1)*sizeof(StructureRequirement));
+        // Special case for height handling for certain structure types
+        int skipSurfaceHeight = (structureType == 19 || structureType == 17 || 
+                                structureType == 15 || structureType == 14 || 
+                                structureType == 11);
+
+        // Validate structure type
+        if (structureType < 0) {
+            fprintf(stderr, "Warning: Invalid structure type %d\n", structureType);
+            return;
+        }
+
+        // Add to requirements array
+        structureRequirements = realloc(structureRequirements, 
+                                      (NUM_STRUCTURE_REQUIREMENTS + 1) * sizeof(StructureRequirement));
+        if (!structureRequirements) {
+            fprintf(stderr, "Failed to allocate memory for structure requirement\n");
+            return;
+        }
+
         structureRequirements[NUM_STRUCTURE_REQUIREMENTS].structureType = structureType;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minCount       = minCount;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minHeight      = minH;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].maxHeight      = maxH;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].requiredBiome  = biome;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minBiomeSize   = minSz;
-        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].maxBiomeSize   = maxSz;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minCount = minCount;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minHeight = minH;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].maxHeight = maxH;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].requiredBiome = biome;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].minBiomeSize = minSz;
+        structureRequirements[NUM_STRUCTURE_REQUIREMENTS].maxBiomeSize = maxSz;
         NUM_STRUCTURE_REQUIREMENTS++;
     }
-    else if (strcmp(currentSection, "===== Structure Clusters =====") == 0)
+    else if (strcmp(currentSection, "===== Structure Clusters =====") == 0) 
     {
         // Example lines:
         //   Enabled: true
