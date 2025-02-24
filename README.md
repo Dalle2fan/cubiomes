@@ -113,7 +113,7 @@ sudo chmod -R u+rwx cubiomes
 sudo rm -rf cubiomes
 ```
 
-### **Biome and Structures ID references:**
+# **Biome and Structures ID references:**
 ```
 // Structure ID Reference
 //  0  - Feature
