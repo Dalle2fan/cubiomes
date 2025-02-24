@@ -32,7 +32,7 @@ int customX      = 0;
 int customZ      = 0;
 
 // Number of threads (can be set by user)
-int tasksCount = 10;
+int tasksCount = 50;
 
 // -----------------------------------------------------------------------------
 // Union–find utility for clustering
@@ -290,28 +290,30 @@ int compareInts(const void *a, const void *b)
     return (A - B);
 }
 
-// -----------------------------------------------------------------------------
-// Check if an invalid combination is a subset of the given cluster
 bool isInvalidClusterDynamic(int *groupTypes, int groupSize)
 {
     for (int ic = 0; ic < numInvalidCombinations; ic++) {
         int *invalidSet   = invalidCombinations[ic].types;
         int invalidCount  = invalidCombinations[ic].count;
-        bool isSubset     = true;
-        for (int k = 0; k < invalidCount; k++) {
-            bool found = false;
-            for (int j = 0; j < groupSize; j++) {
-                if (groupTypes[j] == invalidSet[k]) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                isSubset = false;
+
+        // If sizes don't match, it's not an exact match
+        if (groupSize != invalidCount)
+            continue;
+
+        // Sort both arrays to compare irrespective of order
+        qsort(groupTypes, groupSize, sizeof(int), compareInts);
+        qsort(invalidSet, invalidCount, sizeof(int), compareInts);
+
+        // Check if both arrays are identical
+        bool exactMatch = true;
+        for (int k = 0; k < groupSize; k++) {
+            if (groupTypes[k] != invalidSet[k]) {
+                exactMatch = false;
                 break;
             }
         }
-        if (isSubset)
+
+        if (exactMatch)
             return true;
     }
     return false;
@@ -719,8 +721,6 @@ bool scanSeed(uint64_t seed)
                 // check for invalid combination
                 bool invalid = isInvalidClusterDynamic(groupTypes, groupSize);
                 if (invalid) {
-                    printf("Skipping invalid cluster at seed %llu (contains an invalid combination)\n",
-                           (unsigned long long) seed);
                     free(groupTypes);
                     free(indices);
                     continue;
