@@ -1,11 +1,7 @@
 # **Advanced Minecraft Seed Finder**  
 
-## **Website (MUCH slower):** [mc-seed-finder.replit.app](https://mc-seed-finder.replit.app/)  
-
-### *(If website is down, you can use the seed finder by following the Installation)*
-
 ## **Overview**  
-This tool automates finding Minecraft seeds based on specific biomes, structures, and terrain features. Supports Java and Bedrock editions (1.18 to 1.21.6)
+This tool automates finding Minecraft seeds by entering search paramaters with about 100 seeds scanned per second.
 
 ## **Features**  
 - Find structures with biome constraints, height ranges, and minimum amount  
@@ -14,7 +10,8 @@ This tool automates finding Minecraft seeds based on specific biomes, structures
 - Set biome size requirements
 
 ## **Usage**  
-After running, set and paste the parameters for seed scanning, and then press Control+D enter the parameters to start the scan.
+1. After installation is set up, set and paste the parameters for seed scanning.
+2. Then press Control+D to submit the parameters to start the scan.
 
 ### **Working Example:**
 ```
@@ -76,7 +73,7 @@ Min cluster size  = 2
 2. 185, 4 (min size: -1, max size: -1)
 ```
 
-## **Installation**  
+## **Mac Installation**  
 
 ### **Clone the Repository**  
 ```bash
@@ -103,6 +100,19 @@ sudo ./build.sh
 sudo chmod -R u+rwx cubiomes
 sudo rm -rf cubiomes
 ```
+
+## **Windows installation**
+```bash
+git clone https://github.com/Dalle2fan/cubiomes.git
+cd cubiomes
+sudo apt update && sudo apt install -y build-essential cmake ruby
+```
+### **Run application**
+```bash
+chmod +x build.sh
+sudo ./build.sh
+```
+
 ### **Biome and Structures ID references:**
 ```
 // Structure ID Reference
