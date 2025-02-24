@@ -1,6 +1,6 @@
 # **Advanced Minecraft Seed Finder**  
 
-## **Website:** [mc-seed-finder.replit.app](https://mc-seed-finder.replit.app/)  
+## **Website (MUCH slower):** [mc-seed-finder.replit.app](https://mc-seed-finder.replit.app/)  
 
 ### *(If website is down, you can use the seed finder by following the Installation)*
 
