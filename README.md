@@ -8,10 +8,10 @@
 This tool automates finding Minecraft seeds based on specific biomes, structures, and terrain features. Supports Java and Bedrock editions (1.18 to 1.21.6)
 
 ## **Features**  
-- Find any biomes including custom biomes (like islands, valleys, and elevated encircling terrain)
-- Find structures with biome constraints, height ranges, and minimum counts  
-- Locate clustered structures (structures next to each other) and biome combinations  
-- Set biome size requirements for more precise world generation  
+- Find structures with biome constraints, height ranges, and minimum amount  
+- Find any biomes and any biome combinations
+- Locate clustered structures (structures next to each other)
+- Set biome size requirements
 
 ## **Usage**  
 After running, set and paste the parameters for seed scanning, and then press Control+D enter the parameters to start the scan.
