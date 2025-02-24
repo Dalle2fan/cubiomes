@@ -2,7 +2,7 @@
 
 ## **Overview**  
 This tool automates finding Minecraft seeds by entering search paramaters with about 100 seeds scanned per second. 
-If you also want to check for ravines, caves, islands, and encircling tall terrain I recommend using this seed finder instead *(but it is more slower)*: **https://github.com/Dalle2fan/MC-SeedLocator**
+If you also want to check for ravines, caves, islands, valleys, and encircling tall terrain I recommend using this seed finder instead *(but it is more slower)*: **https://github.com/Dalle2fan/MC-SeedLocator**
 
 ## **Features**  
 - Find structures with biome constraints, height ranges, and minimum amount  
