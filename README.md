@@ -95,12 +95,6 @@ chmod +x build.sh
 sudo ./build.sh
 ```
 
-## **Uninstallation**
-```bash
-sudo chmod -R u+rwx cubiomes
-sudo rm -rf cubiomes
-```
-
 ## **Windows installation**
 ```bash
 git clone https://github.com/Dalle2fan/cubiomes.git
@@ -111,6 +105,12 @@ sudo apt update && sudo apt install -y build-essential cmake ruby
 ```bash
 chmod +x build.sh
 sudo ./build.sh
+```
+
+## **Uninstallation**
+```bash
+sudo chmod -R u+rwx cubiomes
+sudo rm -rf cubiomes
 ```
 
 ### **Biome and Structures ID references:**
